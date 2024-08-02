@@ -1,0 +1,1 @@
+jre-min\bin\java.exe -jar dist\SlackEmojiMaker.jar
