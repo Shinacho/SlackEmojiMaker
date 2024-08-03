@@ -86,93 +86,102 @@ public class MainFrame extends javax.swing.JFrame {
 		g.setBackground(jButton2.getForeground());
 		g.clearRect(0, 0, imageSize, imageSize);
 
-		//text
-		if (jTextArea1.getText().isEmpty()) {
-			g.dispose();
-			//set
-			jLabel6.setIcon(new ImageIcon(image));
-			jButton3.setEnabled(true);
-			return;
-		}
+		//色が同じ場合は終わり
+		if (!jButton1.getForeground().equals(jButton2.getForeground())) {
 
-		String[] text = StringUtil.safeSplit(jTextArea1.getText(), "\n");
-		List<String> list = Arrays.stream(text).filter(p -> !"".equals(p)).filter(p -> !p.trim().equals("")).toList();
-
-		//rows
-		int rows = list.size();
-
-		//draw
-		int fontSize = imageSize / rows;
-
-		Font font = new Font(jComboBox2.getSelectedItem().toString(), Font.PLAIN, fontSize);
-
-		//draw
-		for (int line = 0; line < rows; line++) {
-			BufferedImage textImage = ImageUtil.newImage(4096, fontSize * 3);
-			Graphics2D g2 = ImageUtil.createGraphics2D(textImage, RenderingConfig.QUALITY);
-			g2.setFont(font);
-			g2.setColor(jButton1.getForeground());
-
-			int x = 0;
-			int y = fontSize;
-			g2.drawString(list.get(line), x, y);
-			g2.dispose();
-
-			//location
-			Point start = start(textImage);
-			Point end = end(textImage);
-			int w = end.x - start.x;
-			int h = end.y - start.y;
-			if (w == 0 || h == 0) {
-				JOptionPane.showConfirmDialog(this, "文字が多すぎます", "ERROR", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
-				jButton3.setEnabled(false);
+			//text
+			if (jTextArea1.getText().isEmpty()) {
+				g.dispose();
+				//set
+				jLabel6.setIcon(new ImageIcon(image));
+				jButton3.setEnabled(true);
 				return;
 			}
 
-			//cut
-			BufferedImage l = ImageUtil.trimming(textImage, start.x, start.y, w, h);
+			String[] text = StringUtil.safeSplit(jTextArea1.getText(), "\n");
+			List<String> list = Arrays.stream(text).filter(p -> !"".equals(p)).filter(p -> !p.trim().equals("")).toList();
 
-			//resize
-			{
-				int ww = imageSize;
-				l = ImageUtil.resize(l, ww, fontSize);
-			}
+			//rows
+			int rows = list.size();
+
 			//draw
-			int nx = imageSize / 2 - l.getWidth() / 2;
-			int ny = (fontSize * line);
-			g.drawImage(l, nx, ny, null);
-		}
-		g.dispose();
+			int fontSize = imageSize / rows;
 
-		//ちょっと小さめ
-		if (jCheckBox1.isSelected()) {
-			final float scale = 0.9f;
-			int newSize = (int) (image.getWidth() * scale);
-			BufferedImage newImage = ImageUtil.resize(image, newSize, newSize);
-			Graphics2D g2 = ImageUtil.createGraphics2D(image, RenderingConfig.QUALITY);
-			//imageに上書き
-			//backColor
-			g2.setBackground(jButton2.getForeground());
-			g2.clearRect(0, 0, imageSize, imageSize);
-			//text
-			int gap = (image.getWidth() - newSize) / 2;
-			g2.drawImage(newImage, gap, gap, null);
-			g2.dispose();
-		}
-		//もっと小さめ
-		if (jCheckBox2.isSelected()) {
-			final float scale = 0.9f;
-			int newSize = (int) (image.getWidth() * scale);
-			BufferedImage newImage = ImageUtil.resize(image, newSize, newSize);
-			Graphics2D g2 = ImageUtil.createGraphics2D(image, RenderingConfig.QUALITY);
-			//imageに上書き
-			//backColor
-			g2.setBackground(jButton2.getForeground());
-			g2.clearRect(0, 0, imageSize, imageSize);
-			//text
-			int gap = (image.getWidth() - newSize) / 2;
-			g2.drawImage(newImage, gap, gap, null);
-			g2.dispose();
+			int fontMode = jCheckBox3.isSelected()
+					? jCheckBox4.isSelected() ? Font.BOLD | Font.ITALIC
+					: Font.BOLD : jCheckBox4.isSelected() ? Font.ITALIC : Font.PLAIN;
+			Font font = new Font(jComboBox2.getSelectedItem().toString(),
+					fontMode,
+					fontSize);
+
+			//draw
+			for (int line = 0; line < rows; line++) {
+				BufferedImage textImage = ImageUtil.newImage(4096, fontSize * 3);
+				Graphics2D g2 = ImageUtil.createGraphics2D(textImage, RenderingConfig.QUALITY);
+				g2.setFont(font);
+				g2.setColor(jButton1.getForeground());
+
+				int x = 0;
+				int y = fontSize;
+				g2.drawString(list.get(line), x, y);
+				g2.dispose();
+
+				//location
+				Point start = start(textImage);
+				Point end = end(textImage);
+				int w = end.x - start.x;
+				int h = end.y - start.y;
+				if (w == 0 || h == 0) {
+					JOptionPane.showConfirmDialog(this, "文字が多すぎます", "ERROR", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
+					jButton3.setEnabled(false);
+					return;
+				}
+
+				//cut
+				BufferedImage l = ImageUtil.trimming(textImage, start.x, start.y, w, h);
+
+				//resize
+				{
+					int ww = imageSize;
+					l = ImageUtil.resize(l, ww, fontSize);
+				}
+				//draw
+				int nx = imageSize / 2 - l.getWidth() / 2;
+				int ny = (fontSize * line);
+				g.drawImage(l, nx, ny, null);
+			}
+			g.dispose();
+
+			//ちょっと小さめ
+			if (jCheckBox1.isSelected()) {
+				final float scale = 0.9f;
+				int newSize = (int) (image.getWidth() * scale);
+				BufferedImage newImage = ImageUtil.resize(image, newSize, newSize);
+				Graphics2D g2 = ImageUtil.createGraphics2D(image, RenderingConfig.QUALITY);
+				//imageに上書き
+				//backColor
+				g2.setBackground(jButton2.getForeground());
+				g2.clearRect(0, 0, imageSize, imageSize);
+				//text
+				int gap = (image.getWidth() - newSize) / 2;
+				g2.drawImage(newImage, gap, gap, null);
+				g2.dispose();
+			}
+			//もっと小さめ
+			if (jCheckBox2.isSelected()) {
+				final float scale = 0.9f;
+				int newSize = (int) (image.getWidth() * scale);
+				BufferedImage newImage = ImageUtil.resize(image, newSize, newSize);
+				Graphics2D g2 = ImageUtil.createGraphics2D(image, RenderingConfig.QUALITY);
+				//imageに上書き
+				//backColor
+				g2.setBackground(jButton2.getForeground());
+				g2.clearRect(0, 0, imageSize, imageSize);
+				//text
+				int gap = (image.getWidth() - newSize) / 2;
+				g2.drawImage(newImage, gap, gap, null);
+				g2.dispose();
+			}
 		}
 
 		//set
@@ -287,6 +296,8 @@ public class MainFrame extends javax.swing.JFrame {
         jSeparator1 = new javax.swing.JSeparator();
         jCheckBox1 = new javax.swing.JCheckBox();
         jCheckBox2 = new javax.swing.JCheckBox();
+        jCheckBox3 = new javax.swing.JCheckBox();
+        jCheckBox4 = new javax.swing.JCheckBox();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Slack 絵文字 めーかー");
@@ -371,78 +382,96 @@ public class MainFrame extends javax.swing.JFrame {
             }
         });
 
+        jCheckBox3.setText("太字");
+        jCheckBox3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jCheckBox3ActionPerformed(evt);
+            }
+        });
+
+        jCheckBox4.setText("斜体");
+        jCheckBox4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jCheckBox4ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+            .addGroup(layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addContainerGap()
-                        .addComponent(jSeparator1))
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addComponent(jButton3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
-                                .addContainerGap()
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 66, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addGroup(layout.createSequentialGroup()
                                         .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                            .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, 64, Short.MAX_VALUE)
-                                            .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                             .addGroup(layout.createSequentialGroup()
-                                                .addComponent(jButton2)
+                                                .addComponent(jCheckBox3)
                                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                            .addGroup(layout.createSequentialGroup()
-                                                .addComponent(jButton1)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                                .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addGroup(layout.createSequentialGroup()
-                                                .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addComponent(jCheckBox4)
+                                                .addGap(18, 18, 18)
+                                                .addComponent(jCheckBox1)
                                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                .addComponent(jCheckBox1))
+                                                .addComponent(jCheckBox2))
                                             .addGroup(layout.createSequentialGroup()
-                                                .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
                                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                .addComponent(jCheckBox2)))))))
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                        .addGap(18, 18, 18)
-                        .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, 574, Short.MAX_VALUE)))
+                                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                                    .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, 64, Short.MAX_VALUE)
+                                                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                    .addGroup(layout.createSequentialGroup()
+                                                        .addComponent(jButton2)
+                                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                        .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                                    .addGroup(layout.createSequentialGroup()
+                                                        .addComponent(jButton1)
+                                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                        .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                    .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE))))))
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addComponent(jLabel6, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jSeparator1)))
+                    .addComponent(jButton3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jLabel1)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel2)
                             .addComponent(jButton1)
                             .addComponent(jLabel4)
-                            .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jCheckBox1))
-                        .addGap(18, 18, 18)
+                            .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel3)
                             .addComponent(jButton2)
                             .addComponent(jLabel7)
-                            .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jCheckBox2)))
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(jScrollPane1))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jCheckBox3)
+                    .addComponent(jCheckBox4)
+                    .addComponent(jCheckBox1)
+                    .addComponent(jCheckBox2))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel5)
@@ -470,7 +499,6 @@ public class MainFrame extends javax.swing.JFrame {
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
 
 		Color c = JColorChooser.showDialog(this, "select color", jButton1.getForeground());
-
 		if (c == null) {
 			return;
 		}
@@ -517,8 +545,16 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_jCheckBox1ActionPerformed
 
     private void jCheckBox2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBox2ActionPerformed
-        buildImage();
+		buildImage();
     }//GEN-LAST:event_jCheckBox2ActionPerformed
+
+    private void jCheckBox3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBox3ActionPerformed
+		buildImage();
+    }//GEN-LAST:event_jCheckBox3ActionPerformed
+
+    private void jCheckBox4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBox4ActionPerformed
+		buildImage();
+    }//GEN-LAST:event_jCheckBox4ActionPerformed
 
 	/**
 	 * @param args the command line arguments
@@ -559,6 +595,8 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JButton jButton3;
     private javax.swing.JCheckBox jCheckBox1;
     private javax.swing.JCheckBox jCheckBox2;
+    private javax.swing.JCheckBox jCheckBox3;
+    private javax.swing.JCheckBox jCheckBox4;
     private javax.swing.JComboBox<String> jComboBox1;
     private javax.swing.JComboBox<String> jComboBox2;
     private javax.swing.JLabel jLabel1;
