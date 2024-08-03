@@ -323,6 +323,7 @@ public class MainFrame extends javax.swing.JFrame {
         jLabel3.setText("back color");
 
         jButton2.setText("■");
+        jButton2.setToolTipText("背景を透明にするにはRGBのアルファを0にしてください");
         jButton2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton2ActionPerformed(evt);
