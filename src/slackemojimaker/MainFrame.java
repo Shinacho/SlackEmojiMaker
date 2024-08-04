@@ -99,10 +99,17 @@ public class MainFrame extends javax.swing.JFrame {
 			}
 
 			String[] text = StringUtil.safeSplit(jTextArea1.getText(), "\n");
-			List<String> list = Arrays.stream(text).filter(p -> !"".equals(p)).filter(p -> !p.trim().equals("")).toList();
+			List<String> list = Arrays.stream(text).filter(p -> !"".equals(p)).filter(p -> !p.trim().equals("")).filter(p -> !"　".equals(p)).toList();
 
 			//rows
 			int rows = list.size();
+			if (rows == 0) {
+				g.dispose();
+				//set
+				jLabel6.setIcon(new ImageIcon(image));
+				jButton3.setEnabled(true);
+				return;
+			}
 
 			//draw
 			int fontSize = imageSize / rows;
