@@ -138,7 +138,7 @@ public class MainFrame extends javax.swing.JFrame {
 				Point end = end(textImage);
 				int w = end.x - start.x;
 				int h = end.y - start.y;
-				if (w == 0 || h == 0) {
+				if (w <= 0 || h <= 0) {
 					JOptionPane.showConfirmDialog(this, "文字が多すぎますね", "ERROR", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
 					jButton3.setEnabled(false);
 					return;
@@ -148,10 +148,9 @@ public class MainFrame extends javax.swing.JFrame {
 				BufferedImage l = ImageUtil.trimming(textImage, start.x, start.y, w, h);
 
 				//resize
-				{
-					int ww = imageSize;
-					l = ImageUtil.resize(l, ww, fontSize);
-				}
+				int ww = imageSize;
+				l = ImageUtil.resize(l, ww, fontSize);
+
 				//draw
 				int nx = imageSize / 2 - l.getWidth() / 2;
 				int ny = (fontSize * line);
