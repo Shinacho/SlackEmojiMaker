@@ -11,3 +11,4 @@ Slackの絵文字を作る謎のツールです。多分すでに同様のサー
 使い方：
 　いい感じに設定してボタンを押すだけ！！！
  
+![image](https://github.com/user-attachments/assets/0764967e-a150-4bb0-80a7-96ce34d51c58)
