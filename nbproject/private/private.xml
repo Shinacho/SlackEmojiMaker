@@ -2,15 +2,6 @@
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group>
-            <file>file:/D:/Project/SlackEmojiMaker/src/util/ContentsIOException.java</file>
-            <file>file:/D:/Project/SlackEmojiMaker/src/slackemojimaker/MainFrame.java</file>
-            <file>file:/D:/Project/SlackEmojiMaker/src/util/FileNotFoundException.java</file>
-            <file>file:/D:/Project/SlackEmojiMaker/src/util/TempFile.java</file>
-            <file>file:/D:/Project/SlackEmojiMaker/src/util/ARGBColor.java</file>
-            <file>file:/D:/Project/SlackEmojiMaker/src/util/NotFoundException.java</file>
-            <file>file:/D:/Project/SlackEmojiMaker/src/util/RenderingConfig.java</file>
-            <file>file:/D:/Project/SlackEmojiMaker/src/util/StringUtil.java</file>
-        </group>
+        <group/>
     </open-files>
 </project-private>
