@@ -3,6 +3,7 @@ package slackemojimaker;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
+import java.awt.GraphicsEnvironment;
 import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
@@ -44,14 +45,13 @@ public class MainFrame extends javax.swing.JFrame {
 
 	private void init() {
 		setIconImage(new ImageIcon(getClass().getResource("icon.png")).getImage());
-		Color fontColor = Color.BLACK;
-		Color backColor = Color.WHITE;
-		jButton1.setForeground(fontColor);
-		jButton2.setForeground(backColor);
 
+		jComboBox1.addItem("512");
 		jComboBox1.addItem("256");
 		jComboBox1.addItem("128");
 		jComboBox1.addItem("64");
+		jComboBox1.addItem("768");
+		jComboBox1.addItem("1024");
 
 		jComboBox1.setSelectedIndex(0);
 
@@ -60,6 +60,9 @@ public class MainFrame extends javax.swing.JFrame {
 		jComboBox2.addItem(Font.SERIF);
 		jComboBox2.addItem(Font.DIALOG);
 		jComboBox2.addItem(Font.DIALOG_INPUT);
+		for (var v : GraphicsEnvironment.getLocalGraphicsEnvironment().getAllFonts()) {
+			jComboBox2.addItem(v.getName());
+		}
 
 		jComboBox2.setSelectedIndex(0);
 
@@ -86,7 +89,7 @@ public class MainFrame extends javax.swing.JFrame {
 		g.setBackground(jButton2.getForeground());
 		g.clearRect(0, 0, imageSize, imageSize);
 
-		//色が同じ場合は終わり
+		//色が同じ場合は文字を描画しない
 		if (!jButton1.getForeground().equals(jButton2.getForeground())) {
 
 			//text
@@ -111,19 +114,24 @@ public class MainFrame extends javax.swing.JFrame {
 				return;
 			}
 
-			//draw
+			//フォント基礎サイズ
 			int fontSize = imageSize / rows;
 
-			int fontMode = jCheckBox3.isSelected()
-					? jCheckBox4.isSelected() ? Font.BOLD | Font.ITALIC
-					: Font.BOLD : jCheckBox4.isSelected() ? Font.ITALIC : Font.PLAIN;
+			//フォント
+			int fontMode = Font.PLAIN;
+			if(jCheckBox3.isSelected()){
+				fontMode |= Font.BOLD;
+			}
+			if(jCheckBox4.isSelected()){
+				fontMode |= Font.ITALIC;
+			}
 			Font font = new Font(jComboBox2.getSelectedItem().toString(),
 					fontMode,
 					fontSize);
 
 			//draw
 			for (int line = 0; line < rows; line++) {
-				BufferedImage textImage = ImageUtil.newImage(4096, fontSize * 3);
+				BufferedImage textImage = ImageUtil.newImage(imageSize * 12, fontSize * 3);
 				Graphics2D g2 = ImageUtil.createGraphics2D(textImage, RenderingConfig.QUALITY);
 				g2.setFont(font);
 				g2.setColor(jButton1.getForeground());
@@ -139,9 +147,11 @@ public class MainFrame extends javax.swing.JFrame {
 				int w = end.x - start.x;
 				int h = end.y - start.y;
 				if (w <= 0 || h <= 0) {
-					JOptionPane.showConfirmDialog(this, "文字が多すぎますね", "ERROR", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
-					jButton3.setEnabled(false);
-					return;
+					if (!jCheckBox5.isSelected()) {
+						JOptionPane.showConfirmDialog(this, "文字が多すぎますね", "ERROR", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
+						jButton3.setEnabled(false);
+						return;
+					}
 				}
 
 				//cut
@@ -150,6 +160,7 @@ public class MainFrame extends javax.swing.JFrame {
 				//resize
 				int ww = imageSize;
 				l = ImageUtil.resize(l, ww, fontSize);
+				System.out.println(ww + " / " + fontSize);
 
 				//draw
 				int nx = imageSize / 2 - l.getWidth() / 2;
@@ -198,17 +209,21 @@ public class MainFrame extends javax.swing.JFrame {
 		try {
 			ImageUtil.save(f.getFile(), image);
 		} catch (ContentsIOException e) {
-			JOptionPane.showConfirmDialog(this, "ファイル名に使用できない文字が含まれているようですね", "ERROR", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
-			return;
+			if (!jCheckBox5.isSelected()) {
+				JOptionPane.showConfirmDialog(this, "ファイル名に使用できない文字が含まれているようですね", "ERROR", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
+				return;
+			}
 		}
 
 		try {
 			long size = Files.size(f.getFile().toPath());
 			final long LIMIT = 128 * 1024;
 			if (size >= LIMIT) {
-				JOptionPane.showConfirmDialog(this, "128KBを超えているのでSlackの絵文字に使えませんね。\n画像サイズを小さくしてください。", "ERROR", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
-				jButton3.setEnabled(false);
-				return;
+				if (!jCheckBox5.isSelected()) {
+
+					JOptionPane.showConfirmDialog(this, "128KBを超えているのでSlackの絵文字に使えませんね。\nSlackで使う場合は画像サイズを小さくしてくださいね。", "ERROR", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
+					return;
+				}
 			}
 		} catch (IOException ex) {
 		}
@@ -307,6 +322,8 @@ public class MainFrame extends javax.swing.JFrame {
         jCheckBox2 = new javax.swing.JCheckBox();
         jCheckBox3 = new javax.swing.JCheckBox();
         jCheckBox4 = new javax.swing.JCheckBox();
+        jCheckBox5 = new javax.swing.JCheckBox();
+        jLabel8 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Slack 絵文字 めーかー");
@@ -323,7 +340,7 @@ public class MainFrame extends javax.swing.JFrame {
 
         jTextArea1.setColumns(2);
         jTextArea1.setRows(2);
-        jTextArea1.setText("承知\nしました");
+        jTextArea1.setText("一般将校は\n黙っていろ！");
         jTextArea1.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
                 jTextArea1KeyReleased(evt);
@@ -333,6 +350,7 @@ public class MainFrame extends javax.swing.JFrame {
 
         jLabel2.setText("文字の色");
 
+        jButton1.setForeground(new java.awt.Color(255, 204, 0));
         jButton1.setText("■");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -342,6 +360,7 @@ public class MainFrame extends javax.swing.JFrame {
 
         jLabel3.setText("背景の色");
 
+        jButton2.setForeground(new java.awt.Color(51, 0, 51));
         jButton2.setText("■");
         jButton2.setToolTipText("背景を透明にするにはRGBのアルファを0にしてください");
         jButton2.addActionListener(new java.awt.event.ActionListener() {
@@ -377,6 +396,7 @@ public class MainFrame extends javax.swing.JFrame {
             }
         });
 
+        jCheckBox1.setSelected(true);
         jCheckBox1.setText("少し小さめ");
         jCheckBox1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -405,6 +425,11 @@ public class MainFrame extends javax.swing.JFrame {
             }
         });
 
+        jCheckBox5.setText("警告抑止");
+        jCheckBox5.setToolTipText("サイズ警告などを表示しないようにします");
+
+        jLabel8.setText("←1行12文字まで");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -414,42 +439,45 @@ public class MainFrame extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jButton3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel6, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jSeparator1)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 66, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 78, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jSeparator1))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(jCheckBox3)
+                                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jCheckBox4)
+                                .addComponent(jButton1)
                                 .addGap(18, 18, 18)
+                                .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jButton2)
+                                .addGap(18, 18, 18)
+                                .addComponent(jCheckBox3)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jCheckBox4)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jCheckBox1)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jCheckBox2))
+                                .addComponent(jCheckBox2)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jCheckBox5)
+                                .addGap(18, 18, 18)
+                                .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(jLabel7)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, 572, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addComponent(jButton2)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                        .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addComponent(jButton1)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                        .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(jComboBox1, 0, 139, Short.MAX_VALUE)
-                                    .addComponent(jComboBox2, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))))
+                                .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 168, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(0, 0, Short.MAX_VALUE)))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -458,36 +486,34 @@ public class MainFrame extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel2)
                             .addComponent(jButton1)
-                            .addComponent(jLabel4))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel3)
-                            .addComponent(jButton2)
-                            .addComponent(jLabel7)))
-                    .addComponent(jScrollPane1)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(jButton2))
+                        .addGap(4, 4, 4)
+                        .addComponent(jLabel8))
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel7)
+                        .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel4)
+                        .addComponent(jCheckBox3)
+                        .addComponent(jCheckBox4)
+                        .addComponent(jCheckBox1)
+                        .addComponent(jCheckBox2)
+                        .addComponent(jCheckBox5))
+                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 58, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jCheckBox3)
-                    .addComponent(jCheckBox4)
-                    .addComponent(jCheckBox1)
-                    .addComponent(jCheckBox2))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel5))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, 1062, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel5)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 379, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         pack();
@@ -605,6 +631,7 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JCheckBox jCheckBox2;
     private javax.swing.JCheckBox jCheckBox3;
     private javax.swing.JCheckBox jCheckBox4;
+    private javax.swing.JCheckBox jCheckBox5;
     private javax.swing.JComboBox<String> jComboBox1;
     private javax.swing.JComboBox<String> jComboBox2;
     private javax.swing.JLabel jLabel1;
@@ -614,6 +641,7 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JTextArea jTextArea1;
