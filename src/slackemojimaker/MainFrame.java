@@ -160,7 +160,6 @@ public class MainFrame extends javax.swing.JFrame {
 				//resize
 				int ww = imageSize;
 				l = ImageUtil.resize(l, ww, fontSize);
-				System.out.println(ww + " / " + fontSize);
 
 				//draw
 				int nx = imageSize / 2 - l.getWidth() / 2;
