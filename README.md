@@ -20,3 +20,6 @@ Slackの絵文字を作る謎のツールです。多分すでに同様のサー
 ![一般将校は黙っていろ！](https://github.com/user-attachments/assets/a574863b-4cc2-4198-a7ac-5c692c1d521b)
 ![ここはティターンズの拠点である！](https://github.com/user-attachments/assets/518fa559-6e82-4882-81f5-de1f7c65cecb)
 ![正規の連邦軍とはやり方が違う！](https://github.com/user-attachments/assets/06923c2e-abf5-4959-86df-6607c42ef811)
+
+起動したPCに入ってるフォントが使えますが、フォントのライセンスに注意してね！
+
